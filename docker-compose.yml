@@ -1,0 +1,126 @@
+version: '3.8'
+
+services:
+  # Main application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: investment-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/investment_platform
+      - REDIS_URL=redis://redis:6379
+      # Include other environment variables from .env file
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - app-network
+
+  # Database service
+  db:
+    image: postgres:14-alpine
+    container_name: investment-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=investment_platform
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  # Redis for caching and job queues
+  redis:
+    image: redis:7-alpine
+    container_name: investment-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  # Worker service for background jobs
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: investment-worker
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:${DB_PASSWORD}@db:5432/investment_platform
+      - REDIS_URL=redis://redis:6379
+      # Include other environment variables from .env file
+    networks:
+      - app-network
+
+  # Nginx for reverse proxy and static file serving
+  nginx:
+    image: nginx:1.23-alpine
+    container_name: investment-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./frontend/build:/usr/share/nginx/html
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:v2.40.0
+    container_name: investment-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - app-network
+
+  # Visualization with Grafana
+  grafana:
+    image: grafana/grafana:9.3.0
+    container_name: investment-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:

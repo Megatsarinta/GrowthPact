@@ -1,0 +1,47 @@
+investment-platform/
+├── app/                      # Next.js app directory
+│   ├── api/                  # API routes
+│   │   ├── auth/             # Authentication endpoints
+│   │   ├── plans/            # Investment plans endpoints
+│   │   ├── deposits/         # Deposit endpoints
+│   │   ├── withdrawals/      # Withdrawal endpoints
+│   │   ├── kyc/              # KYC endpoints
+│   │   ├── webhooks/         # Webhook handlers
+│   │   └── admin/            # Admin endpoints
+│   ├── auth/                 # Auth pages (login, register)
+│   ├── dashboard/            # User dashboard pages
+│   ├── plans/                # Investment plans pages
+│   ├── admin/                # Admin panel pages
+│   └── ...                   # Other pages
+├── components/               # React components
+│   ├── ui/                   # UI components
+│   ├── auth/                 # Auth components
+│   ├── dashboard/            # Dashboard components
+│   ├── admin/                # Admin components
+│   └── ...                   # Other components
+├── lib/                      # Shared utilities
+│   ├── db/                   # Database utilities
+│   ├── auth/                 # Auth utilities
+│   ├── api/                  # API utilities
+│   └── ...                   # Other utilities
+├── worker/                   # Background worker
+│   ├── jobs/                 # Job definitions
+│   ├── processors/           # Job processors
+│   └── index.ts              # Worker entry point
+├── public/                   # Static assets
+├── scripts/                  # Utility scripts
+├── infra/                    # Infrastructure as code
+│   ├── terraform/            # Terraform configurations
+│   ├── kubernetes/           # Kubernetes manifests
+│   └── ...                   # Other infrastructure
+├── nginx/                    # Nginx configuration
+├── monitoring/               # Monitoring configuration
+├── tests/                    # Test files
+├── .env.example              # Example environment variables
+├── .gitignore                # Git ignore file
+├── docker-compose.yml        # Docker Compose configuration
+├── Dockerfile                # Main application Dockerfile
+├── Dockerfile.worker         # Worker Dockerfile
+├── package.json              # Node.js package file
+├── tsconfig.json             # TypeScript configuration
+└── README.md                 # Project documentation

@@ -1,0 +1,16 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+COPY ./worker ./worker
+COPY ./dist/worker ./dist/worker
+
+# Add non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S worker -u 1001
+RUN chown -R worker:nodejs /app
+USER worker
+
+CMD ["node", "dist/worker/index.js"]
